@@ -5,7 +5,7 @@ This is a simple survival game created using JavaScript, HTML, and CSS. The game
 ## Features
 
 - The player's position follows the cursor. Move the mouse to move the player.
-- Monsters are spawned every 10 seconds.
+- Monsters are spawned every 9 seconds.
 - Monsters move towards the player using a simple form of AI where they adjust their position based on the player's current location.
 - Monsters follow the Boids model's separation rule to avoid clustering together.
 - When a monster touches the player, the game is over, and an alert message is displayed.
