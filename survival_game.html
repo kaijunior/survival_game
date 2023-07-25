@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #player, .monster { 
+      position: absolute; 
+      width: 50px; 
+      height: 50px;
+    }
+    #player { background: blue; }
+    .monster { background: red; }
+
+    #score, #countdown {
+      position: absolute;
+      right: 10px;
+      font-size: 20px;
+    }
+    #score {
+      top: 10px;
+    }
+    #countdown {
+      top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div id="player"></div>
+  <div class="monster"></div>
+  <div id="score">Score: 0</div>
+  <div id="countdown">Next Monster: 9s</div>
+
+  <script>
+    var player = document.getElementById('player');
+    var monsters = Array.from(document.getElementsByClassName('monster'));
+    var gameArea = { width: window.innerWidth, height: window.innerHeight };
+    var speed = 2;
+    var separationDistance = 100;  // Separation distance for Boids model
+    var gameStart = new Date().getTime();
+    var scoreElement = document.getElementById('score');
+    var countdownElement = document.getElementById('countdown');
+    var countdownTimer = 9;  // in seconds
+
+    // Update score every second
+    setInterval(() => {
+      var now = new Date().getTime();
+      var score = Math.floor((now - gameStart) / 1000);
+      scoreElement.textContent = "Score: " + score;
+    }, 1000);
+
+    // Update countdown every second
+    setInterval(() => {
+      countdownElement.textContent = "Next Monster: " + countdownTimer + "s";
+      countdownTimer--;
+
+      if (countdownTimer < 0) {
+        countdownTimer = 9;
+      }
+    }, 1000);
+
+    // Function for Boids separation behavior
+    function separateBoids(monster) {
+      var xForce = 0;
+      var yForce = 0;
+
+      monsters.forEach((otherMonster) => {
+        if (otherMonster !== monster) {
+          var dx = monster.offsetLeft - otherMonster.offsetLeft;
+          var dy = monster.offsetTop - otherMonster.offsetTop;
+          var distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < separationDistance) {
+            xForce += dx / distance;
+            yForce += dy / distance;
+          }
+        }
+      });
+
+      return { x: xForce, y: yForce };
+    }
+
+    function createMonster() {
+      var monster = document.createElement('div');
+      monster.className = 'monster';
+      monster.style.background = 'red';
+      monster.style.position = 'absolute';
+      monster.style.width = '50px';
+      monster.style.height = '50px';
+      document.body.appendChild(monster);
+      monsters.push(monster);
+      countdownTimer = 9;
+    }
+
+    function moveMonster(monster) {
+      var playerPos = { x: player.offsetLeft, y: player.offsetTop };
+      var monsterPos = { x: monster.offsetLeft, y: monster.offsetTop };
+      
+      var dx = playerPos.x - monsterPos.x;
+      var dy = playerPos.y - monsterPos.y;
+      var distance = Math.sqrt(dx*dx + dy*dy);
+      
+      if(distance > 0){
+        var separationForce = separateBoids(monster);
+        monster.style.left = monsterPos.x + dx / distance * speed + separationForce.x + 'px';
+        monster.style.top = monsterPos.y + dy / distance * speed + separationForce.y + 'px';
+      }
+    }
+
+    function movePlayer(e) {
+      player.style.left = e.clientX + 'px';
+      player.style.top = e.clientY + 'px';
+    }
+
+    function checkCollision(monster) {
+      var now = new Date().getTime();
+      if (now - gameStart < 2000) {
+        return;
+      }
+
+      var playerRect = player.getBoundingClientRect();
+      var monsterRect = monster.getBoundingClientRect();
+
+      if (
+        playerRect.left < monsterRect.right &&
+        playerRect.right > monsterRect.left &&
+        playerRect.top < monsterRect.bottom &&
+        playerRect.bottom > monsterRect.top
+      ) {
+        alert('Game Over!');
+        window.location.reload();
+      }
+    }
+
+    window.addEventListener('mousemove', movePlayer);
+    setInterval(() => {
+      monsters.forEach((monster) => {
+        moveMonster(monster);
+        checkCollision(monster);
+      });
+    }, 20);
+    setInterval(createMonster, 10000);
+  </script>
+</body>
+</html>
