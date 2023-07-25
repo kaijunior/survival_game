@@ -17,3 +17,4 @@ This game is a fun project for those interested in JavaScript game development a
 ## Installation and Play
 
 No installation is required. Simply clone this repository and open the HTML file in a browser to play the game.
+Play online at https://kaijunior.github.io/survival_game/survival_game.html
